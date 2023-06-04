@@ -1,127 +1,129 @@
-import os 
+import os
 import json
+from modulos import generacontra
 
-db={}
-db['usuarios']={}
+db = {}
+id_clientes = 1 #PARA INCREMENTAR EL ID DE LOS USUARIOS DE FORMA CRECIENTE
 
+class Usuario:
+    def __init__(self, id):
+        self.id = id
+
+class Cliente(Usuario):
+    def __init__(self, id, nombre):
+        super().__init__(id)
+        self.nombre = nombre
+
+    def login(): #LOGIN ES EL MISMO QUE LA PRE-ENTREGA 1 PERO EL REGISTER FUE ACTUALIZADO
+        user = input('Ingrese su usuario: ')
+        pwd = input('Ingrese su contraseña: ')
+        if len(user) < 4:
+            print('Los caracteres mínimos son 4')
+        elif len(pwd) < 8:
+            print('Cáracteres insuficientes')
+        elif user in db and db[user]['pwd'] == pwd:
+            print(f'Bienvenido, {user}!')
+            carrito_compras(user)
+        else:
+            print('Usuario o contraseña incorrectos')
 
 def register():
-    user= input('Crear nombre de usuario: ')
-    pwd= input('Crear Contraseña: ')
-    pwdC= input('Confirmar Contraseña: ')
-    if len(user) < 4:
-        print('Los caracteres minimos son 4')
-    elif pwd != pwdC:
-        print('Las contraseñas no son iguales')
-    elif len(pwd) < 8:
-        print('Cáracteres insuficientes')
-    elif user in db['usuarios']:
-        print('usuario existe')
+    global id_clientes #EL GLOBAL PARA DECIR QUE EL ID_CLIENTES ES UNA VARIABLE GLOBAL 
+    user = input('Crear nombre de usuario: ')
+    choice = input('¿Desea generar una contraseña aleatoria? (s/n): ')
+
+    if choice.lower() == 's':
+        pwd = generacontra.generador_contraseñas()
+        print(f'Su contraseña generada aleatoriamente es: {pwd}')
     else:
-        db['usuarios'][user] = pwd
-        dbfile = open('usuarios.json', 'w')
-        json.dump(db, dbfile)
+        pwd = input('Crear contraseña: ')
+
+    pwdC = input('Confirmar contraseña(En caso de haber generado una, copiar contraseña y pegarla): ') #PARA COPIAR Y PEGAR LA CONTRASEÑA COPIARLA CON CTRL+V Y PEGARLA CON EL CLICK DERECHO
+    id_clientes += 1
+    if len(user) < 4:
+        print('Los caracteres mínimos son 4')
+    elif pwd != pwdC:
+        print('Las contraseñas no coinciden')
+    elif user in db:
+        print('El usuario ya existe')
+    else:
+        db[user] = {
+            'pwd': pwd,
+            'id': id_clientes
+        }
+        with open('usuarios.json', 'w') as dbfile:
+            json.dump(db, dbfile)
         print('Usuario creado!')
 
-def login():
-    user= input('Ingrese su usuario: ')
-    pwd= input('Ingrese su contraseña: ')
-    if len(user) < 4 :
-        print('Los caracteres minimos son 4')
-    elif len(pwd) < 8:
-        print('Cáracteres insuficientes')
-    elif db['usuarios'][user] == pwd:
-        print(f'Bienvenido! {user}')
-    else:
-        print('No coincide')
 
-def pagina(accOrLog=None):
-    os.system('cls')
+def carrito_compras(user): 
+    carrito = []
     while True:
-        print('\n\nPágina génerica\n')
-        accOrLog= input('Iniciar sesión: 1\nRegistrarse: 2\nSalir: 3\nOpcion: ')
-        if accOrLog == '1':
-            login()
-        elif accOrLog == '2':
+        os.system('cls')
+        print(f'\n\nCarrito de Compras - Usuario: {user}\n')
+        print('1. Agregar producto al carrito')
+        print('2. Ver carrito')
+        print('3. Finalizar compra')
+        print('4. Volver')
+        opcion = input('Opción: ')
+        
+        if opcion == '1':
+            producto = input('Ingrese el nombre del producto: ')
+            carrito.append(producto)
+            print(f'Producto "{producto}" agregado al carrito.')
+            input('Presione Enter para continuar...')
+        elif opcion == '2':
+            if carrito:
+                print('Productos en el carrito:')
+                for producto in carrito:
+                    print(f'- {producto}')
+            else:
+                print('El carrito está vacío.')
+            input('Presione Enter para continuar...')
+        elif opcion == '3':
+            if carrito:
+                print('Compra finalizada. ¡Gracias por su compra!')
+                carrito.clear()
+                input('Presione Enter para continuar...')
+            else:
+                print('El carrito está vacío.')
+                input('Presione Enter para continuar...')
+        elif opcion == '4':
+            break
+        else:
+            print('Por favor, ingrese una opción válida.')
+            input('Presione Enter para continuar...')
+
+def pagina():
+    while True:
+        os.system('cls')
+        print('\n\nPágina genérica\n')
+        print('1. Iniciar sesión')
+        print('2. Registrarse')
+        print('3. Salir')
+        opcion = input('Opción: ')
+
+        if opcion == '1':
+            Cliente.login()
+        elif opcion == '2':
             register()
-        elif accOrLog == '3':
+        elif opcion == '3':
             print("Chau")
             break
         else:
-            print('Porfavor ingresa una de las opciones')
+            print('Por favor, ingrese una opción válida.')
+            input('Presione Enter para continuar...')
+
+
 
 try:
-    file = open("usuarios.json", 'r')
-    db = json.loads(file.read())
+    with open("usuarios.json", 'r') as file:
+        db = json.load(file)
 except Exception as e:
-    print(f'Error al leer la Base de datos')
+    print('Error al leer la base de datos')
     db['usuarios'] = {}
 
 pagina()
-
-
-
-
-
-
-
-def register():
-    global id_clientes
-    user= input('Crear nombre de usuario: ')
-    pwd= input('Crear Contraseña: ')
-    pwdC= input('Confirmar Contraseña: ')
-    id_cliente += 1
-    if len(user) < 4:
-        print('Los caracteres minimos son 4')
-    elif pwd != pwdC:
-        print('Las contraseñas no son iguales')
-    elif len(pwd) < 8:
-        print('Cáracteres insuficientes')
-    elif user in db:
-        print('usuario existe')
-    else:
-        db[user] = pwd
-        dbfile = open('usuarios.json', 'w')
-        json.dump(db, dbfile)
-        print('Usuario creado!')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class usuario:
-    def __init__(self,id):
-        self.id = id
-
-
-class cliente(usuario):
-    def __init__(self,id,identidad,residencia,tarjeta,):
-        super().__init__(id)
-        self.nombre = identidad
-        self.residencia = residencia
-        self.tarjeta = tarjeta
-
-
-class proveedor(usuario):
-    def __init__(self, id,empresa,local,cuentabancaria):
-        super().__init__(id)
-        self.empresa = empresa
-        self.local = local
-        self.cuentabancaria = cuentabancaria
-
     
 
 

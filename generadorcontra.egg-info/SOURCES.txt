@@ -1,0 +1,7 @@
+setup.py
+generadorcontra.egg-info/PKG-INFO
+generadorcontra.egg-info/SOURCES.txt
+generadorcontra.egg-info/dependency_links.txt
+generadorcontra.egg-info/top_level.txt
+modulos/__init__.py
+modulos/generacontra.py
